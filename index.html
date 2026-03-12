@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kamus Kata Indonesia</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:30px;
+}
+
+.container{
+max-width:600px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+text-align:center;
+}
+
+input{
+width:100%;
+padding:10px;
+margin:6px 0;
+border:1px solid #ccc;
+border-radius:6px;
+font-size:14px;
+}
+
+#info{
+margin-top:10px;
+font-size:13px;
+color:#555;
+}
+
+#result{
+margin-top:15px;
+max-height:400px;
+overflow:auto;
+border-top:1px solid #eee;
+}
+
+.word{
+padding:6px;
+border-bottom:1px solid #eee;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Kamus Kata</h2>
+
+<input type="text" id="prefix" placeholder="Awalan kata (wajib diisi)">
+
+<input type="text" id="suffix" placeholder="Akhiran kata (opsional)">
+
+<input type="number" id="minlen" value="1" placeholder="Minimal huruf">
+
+<input type="number" id="limit" value="20" placeholder="Jumlah kata ditampilkan">
+
+<div id="info">Memuat kamus...</div>
+
+<div id="result"></div>
+
+</div>
+
+<script>
+
+let dictionary = []
+
+const prefix = document.getElementById("prefix")
+const suffix = document.getElementById("suffix")
+const minlen = document.getElementById("minlen")
+const limit = document.getElementById("limit")
+
+const result = document.getElementById("result")
+const info = document.getElementById("info")
+
+fetch("words.txt")
+.then(res => res.text())
+.then(text => {
+
+dictionary = text
+.split("\n")
+.map(w => w.trim().toLowerCase())
+.filter(Boolean)
+
+info.innerHTML = "Total kata: " + dictionary.length
+
+})
+
+// fungsi pencarian
+function searchWord(){
+
+let pre = prefix.value.toLowerCase()
+let suf = suffix.value.toLowerCase()
+let min = parseInt(minlen.value) || 1
+let lim = parseInt(limit.value) || 20
+
+result.innerHTML = ""
+
+// jika awalan kosong → jangan tampilkan kata
+if(pre === ""){
+result.innerHTML = "<div class='word'>Masukkan awalan kata</div>"
+return
+}
+
+let count = 0
+
+for(let word of dictionary){
+
+if(word.length < min) continue
+if(!word.startsWith(pre)) continue
+if(suf && !word.endsWith(suf)) continue
+
+let div = document.createElement("div")
+div.className = "word"
+div.textContent = word
+
+result.appendChild(div)
+
+count++
+
+if(count >= lim) break
+
+}
+
+if(count === 0){
+result.innerHTML = "<div class='word'>Tidak ditemukan</div>"
+}
+
+}
+
+// realtime search
+prefix.addEventListener("input",searchWord)
+suffix.addEventListener("input",searchWord)
+minlen.addEventListener("input",searchWord)
+limit.addEventListener("input",searchWord)
+
+</script>
+
+</body>
+</html>
